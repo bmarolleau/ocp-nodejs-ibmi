@@ -1,0 +1,16 @@
+{
+  "name": "ibmi_dash",
+  "version": "0.0.1",
+  "description": "IBM i Dashboard",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.12.4",
+    "jade": "^1.10.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Aaron Bartell, Krengel Technology, Inc. litmis.com",
+  "license": "MIT"
+}
