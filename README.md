@@ -8,3 +8,9 @@ Welcome!  This is an open source project that aims to make it easy to create das
 ![2015-06-01_18-38-07.png](https://bitbucket.org/repo/LjEMEz/images/613510403-2015-06-01_18-38-07.png)
 
 ![2015-06-01_18-50-24.png](https://bitbucket.org/repo/LjEMEz/images/65460062-2015-06-01_18-50-24.png)
+
+#Who Was Here
+The following people have taken the time to learn how to do a Git fork and pull request on IBM i.  Well done!
+
+##People
+- Aaron Bartell, Krengel Technology, Inc.
