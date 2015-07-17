@@ -10,7 +10,7 @@ table(class='table table-striped table-hover table-condensed')
   tbody
     - each row in results
       tr
-        td: a(href='/file_waste/#{row.SCHEMA_NAME}')=row.SCHEMA_NAME 
+        td: a(href='/file_waste/#{row.SYSTEM_SCHEMA_NAME}')=row.SYSTEM_SCHEMA_NAME 
         td=row.SCHEMA_OWNER
         td=row.SCHEMA_TEXT
           
