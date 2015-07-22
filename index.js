@@ -34,14 +34,14 @@ app.get('/user/:id', function (req, res) {
 })
 app.get('/file_waste_schemas', function (req, res) {
   var sql = 
-    "SELECT SYSTEM_SCHEMA_NAME, SCHEMA_OWNER, SCHEMA_TEXT FROM QSYS2.SYSSCHEMAS ORDER BY 1" 
+    "select objname, objowner, objtext from table(QSYS2.object_statistics('QSYS      ', 'LIB       ')) libs order by  1" 
   db.exec(sql, function(results) {
     res.render('file_waste_schemas', { title: 'File waste: Select schema', results: results})
   })
 })
 app.get('/file_waste/:id', function (req, res) {
   var sql = 
-    "select a.system_table_name, b.system_table_member, " +
+    "select a.system_table_name, a.table_text, b.system_table_member, " +
 	"       number_rows, number_deleted_rows, " +
 	"       bigint( 100 * number_deleted_rows / max( number_rows+number_deleted_rows, 1 ) ) as Percent_Deleted, " +
 	"       data_size, " +
@@ -49,7 +49,7 @@ app.get('/file_waste/:id', function (req, res) {
 	"  from qsys2.systables a join qsys2.syspartitionstat b on (a.system_table_name, a.system_table_schema) = (b.system_table_name, b.system_table_schema) " +
 	" where a.table_schema = '" + req.params.id + "' " +
 	"       and table_type in ('T', 'P')and table_type in ('T', 'P') and file_type = 'D' and number_deleted_rows > 0 " +
-	" order by 7 desc" +
+	" order by Deleted_Space desc" +
 	" fetch first 100 rows only"
   db.exec(sql, function(results) {
     res.render('file_waste', { title: 'File waste space information - library ' + req.params.id, results: results})
