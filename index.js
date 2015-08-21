@@ -42,13 +42,14 @@ app.get('/file_waste_schemas', function (req, res) {
 app.get('/file_waste/:id', function (req, res) {
   var sql = 
     "select a.system_table_name, a.table_text, b.system_table_member, " +
+	"       date(b.last_change_timestamp) as last_changed_date, date(b.last_used_timestamp) as last_used_date, " +
 	"       number_rows, number_deleted_rows, " +
 	"       bigint( 100 * number_deleted_rows / max( number_rows+number_deleted_rows, 1 ) ) as Percent_Deleted, " +
 	"       data_size, " +
 	"       bigint( data_size * float( number_deleted_rows ) / max( number_rows+number_deleted_rows, 1 ) ) as Deleted_Space " +
 	"  from qsys2.systables a join qsys2.syspartitionstat b on (a.system_table_name, a.system_table_schema) = (b.system_table_name, b.system_table_schema) " +
 	" where a.table_schema = '" + req.params.id + "' " +
-	"       and table_type in ('T', 'P')and table_type in ('T', 'P') and file_type = 'D' and number_deleted_rows > 0 " +
+	"       and table_type in ('T', 'P') and table_type in ('T', 'P') and file_type = 'D' and number_deleted_rows > 0 " +
 	" order by Deleted_Space desc" +
 	" fetch first 100 rows only"
   db.exec(sql, function(results) {
