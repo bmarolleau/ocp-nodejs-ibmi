@@ -1,6 +1,6 @@
 {
   "name": "ibmi_dash",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "IBM i Dashboard",
   "main": "index.js",
   "dependencies": {
@@ -15,5 +15,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Aaron Bartell, Krengel Technology, Inc. litmis.com",
+  "contributors": [
+    {
+        "name": "Christian Jorgensen" 
+    }
+  ],
   "license": "MIT"
 }
