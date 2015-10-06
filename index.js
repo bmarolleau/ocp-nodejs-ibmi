@@ -1,5 +1,7 @@
-var express = require('express')
-var app = express()
+var app = require('express')();
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+
 var db = require('/QOpenSys/QIBM/ProdData/Node/os400/db2i/lib/db2')
 
 app.locals._      = require('underscore');
@@ -56,5 +58,23 @@ app.get('/file_waste/:id', function (req, res) {
   })
 })
 
-app.listen(8000)
-console.log("App running")
+app.get('/wrkactjob', function (req, res) {
+  res.render('wrkactjob', { title: 'WRKACTJOB'})
+})
+
+setInterval( function() {
+  var sql = "SELECT JOB_NAME, AUTHORIZATION_NAME, ELAPSED_TOTAL_DISK_IO_COUNT, " +
+          " ELAPSED_CPU_PERCENTAGE " +
+          " FROM TABLE(QSYS2.ACTIVE_JOB_INFO()) X" +
+          " ORDER BY ELAPSED_CPU_PERCENTAGE DESC" +
+          " FETCH FIRST 20 ROWS ONLY"
+  db.exec(sql, function(results) {
+    io.emit('wrkactjob_update', results);
+  })
+}, 2000);
+
+
+var port = 8000
+server.listen(port, function(){ 
+  console.log('listening on *:%s', port)
+})
