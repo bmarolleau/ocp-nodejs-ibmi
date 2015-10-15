@@ -66,7 +66,7 @@ app.get('/wrkactjob', function (req, res) {
 setInterval( function() {
   var sql = "SELECT JOB_NAME, AUTHORIZATION_NAME, ELAPSED_TOTAL_DISK_IO_COUNT, " +
           " ELAPSED_CPU_PERCENTAGE " +
-          " FROM TABLE(QSYS2.ACTIVE_JOB_INFO()) X" +
+          " FROM TABLE(QSYS2.ACTIVE_JOB_INFO('NO','','','')) X" +
           " ORDER BY ELAPSED_CPU_PERCENTAGE DESC" +
           " FETCH FIRST 20 ROWS ONLY"
   db.exec(sql, function(results) {
