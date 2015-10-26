@@ -9,6 +9,15 @@ Welcome!  This is an open source project that aims to make it easy to create das
 
 ![2015-06-01_18-50-24.png](https://bitbucket.org/repo/LjEMEz/images/65460062-2015-06-01_18-50-24.png)
 
+## Secure Server Config
+Program `openssl` was obtained from [perzl.org](http://perzl.org)
+
+```
+$ openssl genrsa -out ibmidash-key.pem 2048
+$ openssl req -new -sha256 -key ibmidash-key.pem -out ibmidash-csr.pem
+$ openssl x509 -req -in ibmidash-csr.pem -signkey ibmidash-key.pem -out ibmidash-cert.pem
+```
+
 #Who Was Here
 The following people have taken the time to learn how to do a Git fork and pull request on IBM i.  Well done!
 
