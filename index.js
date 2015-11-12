@@ -1,8 +1,22 @@
+//
+// Usage: node index.js [port_secure port_insecure host_name]
+//
 var app = require('express')();
-var server = require('http').Server(app);
-var io = require('socket.io')(server);
-
+var https = require('https')
+var http = require('http')
+var io = require('socket.io')()
+var os = require('os')
+var fs = require('fs')
 var db = require('/QOpenSys/QIBM/ProdData/Node/os400/db2i/lib/db2')
+
+var options = {
+  key: fs.readFileSync('./ibmidash-key.pem'),
+  cert: fs.readFileSync('./ibmidash-cert.pem')
+}
+
+var port_secure = process.argv[2] || 8443
+var port_insecure = process.argv[3] || 8080
+var host_name = process.argv[4] || os.hostname()
 
 app.locals._      = require('underscore');
 app.locals._.str  = require('underscore.string');
@@ -75,7 +89,16 @@ setInterval( function() {
 }, 2000);
 
 
-var port = 8000
-server.listen(port, function(){ 
-  console.log('listening on *:%s', port)
-})
+http.createServer(function(req, res) {
+  var new_loc = 'https://' + host_name + ':' + port_secure
+  console.log('new_loc:%s', new_loc)
+  res.writeHead(301,
+    {Location: new_loc}
+  );
+  res.end();
+}).listen(port_insecure);
+
+var httpsServer = https.createServer(options, app).listen(port_secure);
+
+io.attach(httpsServer)
+
