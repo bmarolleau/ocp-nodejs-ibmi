@@ -73,6 +73,30 @@ app.get('/file_waste/:id', function (req, res) {
   })
 })
 
+app.get('/advised_index_schemas', function (req, res) {
+  var sql = 
+    "select dbname, count(*) as nbradv" +
+	"  from qsys2.sysixadv" +
+	" group by dbname" +
+	" order by nbradv desc" +
+	" fetch first 100 rows only"
+  db.exec(sql, function(results) {
+    res.render('advised_index_schemas', { title: 'Advised Indexes: Select Schema ' + req.params.id, results: results})
+  })
+})
+
+app.get('/advised_indexes/:id', function (req, res) {
+  var sql = 
+    "select dbname, tbname, index_type, nlssname, timesadv, lastadv, keysadv" +
+	"  from qsys2.sysixadv" +
+	" where dbname = '" + req.params.id + "'"
+	" order by tbname" +
+	" fetch first 100 rows only"
+  db.exec(sql, function(results) {
+    res.render('advised_indexes', { title: 'Advised Indexes ' + req.params.id, results: results})
+  })
+})
+
 app.get('/wrkactjob', function (req, res) {
   res.render('wrkactjob', { title: 'WRKACTJOB'})
 })
