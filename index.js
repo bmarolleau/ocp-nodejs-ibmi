@@ -140,17 +140,24 @@ app.get('/splf_stg', function (req, res) {
     res.render('splf_stg', { title: title, results: results })
    })
  })
- 
-setInterval( function() {
-  var sql = "SELECT JOB_NAME, AUTHORIZATION_NAME, ELAPSED_TOTAL_DISK_IO_COUNT, " +
-          " ELAPSED_CPU_PERCENTAGE " +
-          " FROM TABLE(QSYS2.ACTIVE_JOB_INFO('NO','','','')) X" +
-          " ORDER BY ELAPSED_CPU_PERCENTAGE DESC" +
-          " FETCH FIRST 20 ROWS ONLY"
-  db.exec(sql, function(results) {
-    io.emit('wrkactjob_update', results);
+
+io.on( 'connection', function( socket ) {
+  console.log( 'WRKACTJOB client connected' );	
+  var wrkactjob_itv = setInterval( function() {
+    var sql = "SELECT JOB_NAME, AUTHORIZATION_NAME, ELAPSED_TOTAL_DISK_IO_COUNT, " +
+			  " ELAPSED_CPU_PERCENTAGE " +
+              " FROM TABLE(QSYS2.ACTIVE_JOB_INFO('NO','','','')) X" +
+			  " ORDER BY ELAPSED_CPU_PERCENTAGE DESC" +
+			  " FETCH FIRST 20 ROWS ONLY"
+    db.exec(sql, function(results) {
+      socket.emit('wrkactjob_update', results);
+    })
+  }, 2000);
+  socket.on( 'disconnect', function() {
+	  console.log( 'WRKACTJOB client disconnected' );	
+	  clearInterval( wrkactjob_itv );
   })
-}, 2000);
+})
 
 
 http.createServer(function(req, res) {
