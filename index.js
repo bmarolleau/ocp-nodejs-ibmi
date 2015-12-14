@@ -160,6 +160,18 @@ io.on( 'connection', function( socket ) {
 })
 
 
+app.get('/ptf_group_info', function (req, res) {
+  var title = "PTF Group info"
+  var sql = 
+    "select PTF_GROUP_DESCRIPTION, PTF_GROUP_NAME, PTF_GROUP_LEVEL, PTF_GROUP_STATUS " +
+    "  from QSYS2.GROUP_PTF_INFO " +
+    " order by 2 desc "
+  db.exec(sql, function(results) {
+    res.render('ptf_group_info', { title: title, results: results })
+   })
+ })
+
+ 
 http.createServer(function(req, res) {
   var new_loc = 'https://' + host_name + ':' + port_secure
   console.log('new_loc:%s', new_loc)
