@@ -100,18 +100,77 @@ app.get('/wrkactjob', function (req, res) {
   res.render('wrkactjob', { title: 'WRKACTJOB'})
 })
 
-setInterval( function() {
-  var sql = "SELECT JOB_NAME, AUTHORIZATION_NAME, ELAPSED_TOTAL_DISK_IO_COUNT, " +
-          " ELAPSED_CPU_PERCENTAGE " +
-          " FROM TABLE(QSYS2.ACTIVE_JOB_INFO('NO','','','')) X" +
-          " ORDER BY ELAPSED_CPU_PERCENTAGE DESC" +
-          " FETCH FIRST 20 ROWS ONLY"
+app.get('/jobs_splf/:splfname', function (req, res) {
+  var title = "Spoolfile storage by job"
+  var sql = 
+    "select substr( JOB_NAME, locate_in_string( JOB_NAME, '/', 1, 2 ) + 1 ) as JOBNAME, " +
+	"       substr( JOB_NAME, locate_in_string( JOB_NAME, '/', 1, 1 ) + 1, locate_in_string( JOB_NAME, '/', 1, 2) - locate_in_string( JOB_NAME, '/', 1, 1) - 1 ) as JOBUSER, " +
+	"       substr( JOB_NAME, 1, locate_in_string( JOB_NAME, '/', 1, 1) - 1 ) as JOBNBR, " +
+	"       count(*) as SPLF_COUNT, " +
+	"       sum(cast(SIZE as bigint)) * 1024 as SPLF_SIZE, " +
+    "       char(date(max(CREATE_TIMESTAMP))) concat ' ' concat char(time(max(CREATE_TIMESTAMP))) as NEWEST_SPLF " +
+    "  from table(QSYS2.OBJECT_STATISTICS('*ALL      ', '*LIB')) a, " +
+    "       table(QSYS2.OBJECT_STATISTICS(a.OBJNAME, '*OUTQ')) b, " +
+    "       table(QSYS2.OUTPUT_QUEUE_ENTRIES(a.OBJNAME, b.OBJNAME, '*NO')) c " 
+  if ( req.params.splfname != '' && req.params.splfname != '*ALL' ){
+      title += " - " + req.params.splfname
+      sql += "where SPOOLED_FILE_NAME = '" + req.params.splfname + "'"
+  }
+  sql +=
+    " group by JOB_NAME " +
+    " order by 5 desc " +
+    " fetch first 100 rows only"
   db.exec(sql, function(results) {
-    io.emit('wrkactjob_update', results);
+    res.render('jobs_splf', { title: title, results: results })
   })
-}, 2000);
+})
 
 
+app.get('/splf_stg', function (req, res) {
+  var title = "Spoolfile storage"
+  var sql = 
+    "select SPOOLED_FILE_NAME, count(*) as SPLF_COUNT, sum(cast(SIZE as bigint)) * 1024 as SPLF_SIZE" +
+    "  from table(QSYS2.OBJECT_STATISTICS('*ALL      ', '*LIB')) a, " +
+    "       table(QSYS2.OBJECT_STATISTICS(a.OBJNAME, '*OUTQ')) b, " +
+    "       table(QSYS2.OUTPUT_QUEUE_ENTRIES(a.OBJNAME, b.OBJNAME, '*NO')) c " +
+    " group by SPOOLED_FILE_NAME " +
+    " order by 3 desc "
+  db.exec(sql, function(results) {
+    res.render('splf_stg', { title: title, results: results })
+   })
+ })
+
+io.on( 'connection', function( socket ) {
+  console.log( 'WRKACTJOB client connected' );	
+  var wrkactjob_itv = setInterval( function() {
+    var sql = "SELECT JOB_NAME, AUTHORIZATION_NAME, ELAPSED_TOTAL_DISK_IO_COUNT, " +
+			  " ELAPSED_CPU_PERCENTAGE " +
+              " FROM TABLE(QSYS2.ACTIVE_JOB_INFO('NO','','','')) X" +
+			  " ORDER BY ELAPSED_CPU_PERCENTAGE DESC" +
+			  " FETCH FIRST 20 ROWS ONLY"
+    db.exec(sql, function(results) {
+      socket.emit('wrkactjob_update', results);
+    })
+  }, 2000);
+  socket.on( 'disconnect', function() {
+	  console.log( 'WRKACTJOB client disconnected' );	
+	  clearInterval( wrkactjob_itv );
+  })
+})
+
+
+app.get('/ptf_group_info', function (req, res) {
+  var title = "PTF Group info"
+  var sql = 
+    "select PTF_GROUP_DESCRIPTION, PTF_GROUP_NAME, PTF_GROUP_LEVEL, PTF_GROUP_STATUS " +
+    "  from QSYS2.GROUP_PTF_INFO " +
+    " order by 2 desc "
+  db.exec(sql, function(results) {
+    res.render('ptf_group_info', { title: title, results: results })
+   })
+ })
+
+ 
 http.createServer(function(req, res) {
   var new_loc = 'https://' + host_name + ':' + port_secure
   console.log('new_loc:%s', new_loc)
