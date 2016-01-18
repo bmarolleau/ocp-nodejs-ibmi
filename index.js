@@ -32,15 +32,15 @@ app.get('/', function (req, res) {
   res.render('index', { title: 'Hey', message: 'Hello there!'})
 })
 app.get('/users', function (req, res) {
-  var sql = 
+  var sql =
     "SELECT * FROM QSYS2.USER_STORAGE AS US" +
-    " LEFT JOIN QSYS2.USER_INFO AS UI on UI.AUTHORIZATION_NAME=US.AUTHORIZATION_NAME" 
+    " LEFT JOIN QSYS2.USER_INFO AS UI on UI.AUTHORIZATION_NAME=US.AUTHORIZATION_NAME"
   db.exec(sql, function(results) {
     res.render('users', { title: 'Users', results: results})
   })
 })
 app.get('/user/:id', function (req, res) {
-  var sql = 
+  var sql =
     "SELECT * FROM QSYS2.USER_STORAGE AS US" +
     " LEFT JOIN QSYS2.USER_INFO AS UI on UI.AUTHORIZATION_NAME=US.AUTHORIZATION_NAME" +
     " WHERE US.AUTHORIZATION_NAME='" + req.params.id + "'"
@@ -49,14 +49,14 @@ app.get('/user/:id', function (req, res) {
   })
 })
 app.get('/file_waste_schemas', function (req, res) {
-  var sql = 
-    "select objname, objowner, objtext from table(QSYS2.object_statistics('QSYS      ', 'LIB       ')) libs order by  1" 
+  var sql =
+    "select objname, objowner, objtext from table(QSYS2.object_statistics('QSYS      ', 'LIB       ')) libs order by  1"
   db.exec(sql, function(results) {
     res.render('file_waste_schemas', { title: 'File waste: Select schema', results: results})
   })
 })
 app.get('/file_waste/:id', function (req, res) {
-  var sql = 
+  var sql =
     "select a.system_table_name, a.table_text, b.system_table_member, " +
 	"       date(b.last_change_timestamp) as last_changed_date, date(b.last_used_timestamp) as last_used_date, " +
 	"       number_rows, number_deleted_rows, " +
@@ -74,19 +74,19 @@ app.get('/file_waste/:id', function (req, res) {
 })
 
 app.get('/advised_index_schemas', function (req, res) {
-  var sql = 
+  var sql =
     "select dbname, count(*) as nbradv" +
 	"  from qsys2.sysixadv" +
 	" group by dbname" +
 	" order by nbradv desc" +
 	" fetch first 100 rows only"
   db.exec(sql, function(results) {
-    res.render('advised_index_schemas', { title: 'Advised Indexes: Select Schema ' + req.params.id, results: results})
+    res.render('advised_index_schemas', { title: 'Advised Indexes: Select schema', results: results})
   })
 })
 
 app.get('/advised_indexes/:id', function (req, res) {
-  var sql = 
+  var sql =
     "select dbname, tbname, index_type, nlssname, timesadv, lastadv, keysadv" +
 	"  from qsys2.sysixadv" +
 	" where dbname = '" + req.params.id + "'" +
@@ -102,7 +102,7 @@ app.get('/wrkactjob', function (req, res) {
 
 app.get('/jobs_splf/:splfname', function (req, res) {
   var title = "Spoolfile storage by job"
-  var sql = 
+  var sql =
     "select substr( JOB_NAME, locate_in_string( JOB_NAME, '/', 1, 2 ) + 1 ) as JOBNAME, " +
 	"       substr( JOB_NAME, locate_in_string( JOB_NAME, '/', 1, 1 ) + 1, locate_in_string( JOB_NAME, '/', 1, 2) - locate_in_string( JOB_NAME, '/', 1, 1) - 1 ) as JOBUSER, " +
 	"       substr( JOB_NAME, 1, locate_in_string( JOB_NAME, '/', 1, 1) - 1 ) as JOBNBR, " +
@@ -111,7 +111,7 @@ app.get('/jobs_splf/:splfname', function (req, res) {
     "       char(date(max(CREATE_TIMESTAMP))) concat ' ' concat char(time(max(CREATE_TIMESTAMP))) as NEWEST_SPLF " +
     "  from table(QSYS2.OBJECT_STATISTICS('*ALL      ', '*LIB')) a, " +
     "       table(QSYS2.OBJECT_STATISTICS(a.OBJNAME, '*OUTQ')) b, " +
-    "       table(QSYS2.OUTPUT_QUEUE_ENTRIES(a.OBJNAME, b.OBJNAME, '*NO')) c " 
+    "       table(QSYS2.OUTPUT_QUEUE_ENTRIES(a.OBJNAME, b.OBJNAME, '*NO')) c "
   if ( req.params.splfname != '' && req.params.splfname != '*ALL' ){
       title += " - " + req.params.splfname
       sql += "where SPOOLED_FILE_NAME = '" + req.params.splfname + "'"
@@ -128,7 +128,7 @@ app.get('/jobs_splf/:splfname', function (req, res) {
 
 app.get('/splf_stg', function (req, res) {
   var title = "Spoolfile storage"
-  var sql = 
+  var sql =
     "select SPOOLED_FILE_NAME, count(*) as SPLF_COUNT, sum(cast(SIZE as bigint)) * 1024 as SPLF_SIZE" +
     "  from table(QSYS2.OBJECT_STATISTICS('*ALL      ', '*LIB')) a, " +
     "       table(QSYS2.OBJECT_STATISTICS(a.OBJNAME, '*OUTQ')) b, " +
@@ -141,7 +141,7 @@ app.get('/splf_stg', function (req, res) {
  })
 
 io.on( 'connection', function( socket ) {
-  console.log( 'WRKACTJOB client connected' );	
+  console.log( 'WRKACTJOB client connected' );
   var wrkactjob_itv = setInterval( function() {
     var sql = "SELECT JOB_NAME, AUTHORIZATION_NAME, ELAPSED_TOTAL_DISK_IO_COUNT, " +
 			  " ELAPSED_CPU_PERCENTAGE " +
@@ -153,7 +153,7 @@ io.on( 'connection', function( socket ) {
     })
   }, 2000);
   socket.on( 'disconnect', function() {
-	  console.log( 'WRKACTJOB client disconnected' );	
+	  console.log( 'WRKACTJOB client disconnected' );
 	  clearInterval( wrkactjob_itv );
   })
 })
@@ -161,7 +161,7 @@ io.on( 'connection', function( socket ) {
 
 app.get('/ptf_group_info', function (req, res) {
   var title = "PTF Group info"
-  var sql = 
+  var sql =
     "select PTF_GROUP_DESCRIPTION, PTF_GROUP_NAME, PTF_GROUP_LEVEL, PTF_GROUP_STATUS " +
     "  from QSYS2.GROUP_PTF_INFO " +
     " order by 2 desc "
@@ -170,7 +170,7 @@ app.get('/ptf_group_info', function (req, res) {
    })
  })
 
- 
+
 http.createServer(function(req, res) {
   var new_loc = 'https://' + host_name + ':' + port_secure
   console.log('new_loc:%s', new_loc)
