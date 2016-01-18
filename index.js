@@ -89,11 +89,10 @@ app.get('/advised_indexes/:id', function (req, res) {
   var sql = 
     "select dbname, tbname, index_type, nlssname, timesadv, lastadv, keysadv" +
 	"  from qsys2.sysixadv" +
-	" where dbname = '" + req.params.id + "'"
-	" order by tbname" +
-	" fetch first 100 rows only"
+	" where dbname = '" + req.params.id + "'" +
+	" order by tbname, timesadv desc"
   db.exec(sql, function(results) {
-    res.render('advised_indexes', { title: 'Advised Indexes ' + req.params.id, results: results})
+    res.render('advised_indexes', { title: 'Advised Indexes for ' + req.params.id, results: results})
   })
 })
 
