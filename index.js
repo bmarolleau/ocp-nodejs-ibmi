@@ -7,7 +7,10 @@ var http = require('http')
 var io = require('socket.io')()
 var os = require('os')
 var fs = require('fs')
-var db = require('/QOpenSys/QIBM/ProdData/Node/os400/db2i/lib/db2')
+if (process.version.substring(0,3) == "v4.")
+	var db = require('/QOpenSys/QIBM/ProdData/OPS/Node4/os400/db2i/lib/db2');
+else
+	var db = require('/QOpenSys/QIBM/ProdData/Node/os400/db2i/lib/db2');
 
 var options = {
   key: fs.readFileSync('./ibmidash-key.pem'),
