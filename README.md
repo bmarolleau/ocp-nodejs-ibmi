@@ -27,6 +27,14 @@ This project relies heavily on IBM's [DB2 SQL Services](http://bit.ly/db2-for-i-
 ```
 SNDPTFORD PTFID((SF99701))
 ```
+
+# License
+MIT License.  See file `LICENSE` in root of this repo.
+
+## Contribution Agreement
+If you contribute code to this project, you are implicitly allowing your code to be distributed under the MIT license. You are also implicitly verifying that all code is your original work.
+
+
 #Who Was Here
 The following people have taken the time to learn how to do a Git fork and pull request on IBM i.  Well done!
 
