@@ -7,13 +7,17 @@ var http = require('http')
 var io = require('socket.io')()
 var os = require('os')
 var fs = require('fs')
-var xt = require('/QOpenSys/QIBM/ProdData/Node/os400/xstoolkit/lib/itoolkit.js')
-var conn = new xt.iConn("*LOCAL");
 
-if (process.version.substring(0,3) == "v4.")
+if (process.version.substring(0,3) == "v4.") {
 	var db = require('/QOpenSys/QIBM/ProdData/OPS/Node4/os400/db2i/lib/db2');
-else
+    var xt = require('/QOpenSys/QIBM/ProdData/OPS/Node4/os400/xstoolkit/lib/itoolkit.js');
+}
+else {
 	var db = require('/QOpenSys/QIBM/ProdData/Node/os400/db2i/lib/db2');
+    var xt = require('/QOpenSys/QIBM/ProdData/Node/os400/xstoolkit/lib/itoolkit.js');
+}
+
+var conn = new xt.iConn("*LOCAL");
 
 var options = {
   key: fs.readFileSync('./ibmidash-key.pem'),
