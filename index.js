@@ -8,14 +8,12 @@ var io = require('socket.io')()
 var os = require('os')
 var fs = require('fs')
 
-if (process.version.substring(0,3) == "v4.") {
-	var db = require('/QOpenSys/QIBM/ProdData/OPS/Node4/os400/db2i/lib/db2');
-    var xt = require('/QOpenSys/QIBM/ProdData/OPS/Node4/os400/xstoolkit/lib/itoolkit.js');
-}
-else {
-	var db = require('/QOpenSys/QIBM/ProdData/Node/os400/db2i/lib/db2');
-    var xt = require('/QOpenSys/QIBM/ProdData/Node/os400/xstoolkit/lib/itoolkit.js');
-}
+const db = require('idb-connector');
+const xt = require('itoolkit');
+
+var dbconn = new db.dbconn();
+dbconn.conn("*LOCAL");
+dbconn.debug( true );
 
 var conn = new xt.iConn("*LOCAL");
 
@@ -31,10 +29,6 @@ var host_name = process.argv[4] || os.hostname()
 app.locals._      = require('underscore');
 app.locals._.str  = require('underscore.string');
 
-db.debug(true)
-db.init()
-db.conn("*LOCAL")
-
 app.set('views', __dirname + '/views')
 app.set('view engine', 'jade')
 
@@ -42,30 +36,37 @@ app.get('/', function (req, res) {
   res.render('index', { title: 'Hey', message: 'Hello there!'})
 })
 app.get('/users', function (req, res) {
+  var stmt = new db.dbstmt(dbconn);
   var sql =
     "SELECT * FROM QSYS2.USER_STORAGE AS US" +
     " LEFT JOIN QSYS2.USER_INFO AS UI on UI.AUTHORIZATION_NAME=US.AUTHORIZATION_NAME"
-  db.exec(sql, function(results) {
+  stmt.exec(sql, function(results) {
     res.render('users', { title: 'Users', results: results})
+    stmt.close();
   })
 })
 app.get('/user/:id', function (req, res) {
+  var stmt = new db.dbstmt(dbconn);
   var sql =
     "SELECT * FROM QSYS2.USER_STORAGE AS US" +
     " LEFT JOIN QSYS2.USER_INFO AS UI on UI.AUTHORIZATION_NAME=US.AUTHORIZATION_NAME" +
     " WHERE US.AUTHORIZATION_NAME='" + req.params.id + "'"
-  db.exec(sql, function(result) {
+  stmt.exec(sql, function(result) {
     res.render('user', { result: result[0]})
+    stmt.close();
   })
 })
 app.get('/file_waste_schemas', function (req, res) {
+  var stmt = new db.dbstmt(dbconn);
   var sql =
     "select objname, objowner, objtext from table(QSYS2.object_statistics('QSYS      ', 'LIB       ')) libs order by  1"
-  db.exec(sql, function(results) {
+  stmt.exec(sql, function(results) {
     res.render('file_waste_schemas', { title: 'File waste: Select schema', results: results})
+    stmt.close();
   })
 })
 app.get('/file_waste/:id', function (req, res) {
+  var stmt = new db.dbstmt(dbconn);
   var sql =
     "select a.system_table_name, a.table_text, b.system_table_member, " +
 	"       date(b.last_change_timestamp) as last_changed_date, date(b.last_used_timestamp) as last_used_date, " +
@@ -78,31 +79,36 @@ app.get('/file_waste/:id', function (req, res) {
 	"       and table_type in ('T', 'P') and table_type in ('T', 'P') and file_type = 'D' and number_deleted_rows > 0 " +
 	" order by Deleted_Space desc" +
 	" fetch first 100 rows only"
-  db.exec(sql, function(results) {
+  stmt.exec(sql, function(results) {
     res.render('file_waste', { title: 'File waste space information - library ' + req.params.id, results: results})
+    stmt.close();
   })
 })
 
 app.get('/advised_index_schemas', function (req, res) {
+  var stmt = new db.dbstmt(dbconn);
   var sql =
     "select dbname, count(*) as nbradv" +
 	"  from qsys2.sysixadv" +
 	" group by dbname" +
 	" order by nbradv desc" +
 	" fetch first 100 rows only"
-  db.exec(sql, function(results) {
+  stmt.exec(sql, function(results) {
     res.render('advised_index_schemas', { title: 'Advised Indexes: Select schema', results: results})
+    stmt.close();
   })
 })
 
 app.get('/advised_indexes/:id', function (req, res) {
+  var stmt = new db.dbstmt(dbconn);
   var sql =
     "select dbname, tbname, index_type, nlssname, timesadv, lastadv, keysadv" +
 	"  from qsys2.sysixadv" +
 	" where dbname = '" + req.params.id + "'" +
 	" order by tbname, timesadv desc"
-  db.exec(sql, function(results) {
+  stmt.exec(sql, function(results) {
     res.render('advised_indexes', { title: 'Advised Indexes for ' + req.params.id, results: results})
+    stmt.close();
   })
 })
 
@@ -112,6 +118,7 @@ app.get('/wrkactjob', function (req, res) {
 
 app.get('/jobs_splf/:splfname', function (req, res) {
   var title = "Spoolfile storage by job"
+  var stmt = new db.dbstmt(dbconn);
   var sql =
     "select substr( JOB_NAME, locate_in_string( JOB_NAME, '/', 1, 2 ) + 1 ) as JOBNAME, " +
 	"       substr( JOB_NAME, locate_in_string( JOB_NAME, '/', 1, 1 ) + 1, locate_in_string( JOB_NAME, '/', 1, 2) - locate_in_string( JOB_NAME, '/', 1, 1) - 1 ) as JOBUSER, " +
@@ -130,14 +137,16 @@ app.get('/jobs_splf/:splfname', function (req, res) {
     " group by JOB_NAME " +
     " order by 5 desc " +
     " fetch first 100 rows only"
-  db.exec(sql, function(results) {
+  stmt.exec(sql, function(results) {
     res.render('jobs_splf', { title: title, results: results })
+    stmt.close();
   })
 })
 
 
 app.get('/splf_stg', function (req, res) {
   var title = "Spoolfile storage"
+  var stmt = new db.dbstmt(dbconn);
   var sql =
     "select SPOOLED_FILE_NAME, count(*) as SPLF_COUNT, sum(cast(SIZE as bigint)) * 1024 as SPLF_SIZE" +
     "  from table(QSYS2.OBJECT_STATISTICS('*ALL      ', '*LIB')) a, " +
@@ -145,21 +154,24 @@ app.get('/splf_stg', function (req, res) {
     "       table(QSYS2.OUTPUT_QUEUE_ENTRIES(a.OBJNAME, b.OBJNAME, '*NO')) c " +
     " group by SPOOLED_FILE_NAME " +
     " order by 3 desc "
-  db.exec(sql, function(results) {
+  stmt.exec(sql, function(results) {
     res.render('splf_stg', { title: title, results: results })
+    stmt.close();
    })
  })
 
 io.on( 'connection', function( socket ) {
   console.log( 'WRKACTJOB client connected' );
   var wrkactjob_itv = setInterval( function() {
+    var stmt = new db.dbstmt(dbconn);
     var sql = "SELECT JOB_NAME, AUTHORIZATION_NAME, ELAPSED_TOTAL_DISK_IO_COUNT, " +
 			  " ELAPSED_CPU_PERCENTAGE " +
               " FROM TABLE(QSYS2.ACTIVE_JOB_INFO('NO','','','')) X" +
 			  " ORDER BY ELAPSED_CPU_PERCENTAGE DESC" +
 			  " FETCH FIRST 20 ROWS ONLY"
-    db.exec(sql, function(results) {
+    stmt.exec(sql, function(results) {
       socket.emit('wrkactjob_update', results);
+      stmt.close();
     })
   }, 2000);
   socket.on( 'disconnect', function() {
@@ -171,12 +183,14 @@ io.on( 'connection', function( socket ) {
 
 app.get('/ptf_group_info', function (req, res) {
   var title = "PTF Group info"
+  var stmt = new db.dbstmt(dbconn);
   var sql =
     "select PTF_GROUP_DESCRIPTION, PTF_GROUP_NAME, PTF_GROUP_LEVEL, PTF_GROUP_STATUS " +
     "  from QSYS2.GROUP_PTF_INFO " +
     " order by 2 desc "
-  db.exec(sql, function(results) {
+  stmt.exec(sql, function(results) {
     res.render('ptf_group_info', { title: title, results: results })
+    stmt.close();
    })
  })
  
@@ -184,8 +198,9 @@ app.get('/ptf_group_info', function (req, res) {
 app.get('/sysdiskstat', function(req, res) {
     try {
         db.exec("SELECT PERCENT_USED FROM QSYS2.SYSDISKSTAT", function(results) {
-        res.render('sysdiskstat', { title: 'SYSDISKSTAT', diskResults: results});
-        //console.log(results);
+          res.render('sysdiskstat', { title: 'SYSDISKSTAT', diskResults: results});
+          //console.log(results);
+          stmt.close();
         }); 
     }
     catch (err) {
@@ -195,12 +210,14 @@ app.get('/sysdiskstat', function(req, res) {
 
 app.get('/SYSTEM_STATUS_INFO', function(req, res) {
     var title = "SYSTEM_STATUS_INFO"
+    var stmt = new db.dbstmt(dbconn);
     var sql = "SELECT * FROM QSYS2.SYSTEM_STATUS_INFO"
     var url = "https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/QSYS2.SYSTEM_STATUS_INFO"
     try {
-        db.exec(sql, function(results) {
-        res.render('table_view', { title: title, sql: sql, url: url, results: results});
-        //console.log(results);
+        stmt.exec(sql, function(results) {
+          res.render('table_view', { title: title, sql: sql, url: url, results: results});
+          //console.log(results);
+          stmt.close();
         }); 
     }
     catch (err) {
@@ -211,12 +228,14 @@ app.get('/SYSTEM_STATUS_INFO', function(req, res) {
 
 app.get('/LICENSE_INFO', function(req, res) {
     var title = "LICENSE_INFO"
+    var stmt = new db.dbstmt(dbconn);
     var sql = "SELECT * FROM QSYS2.LICENSE_INFO"
     var url = "https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/QSYS2.LICENSE_INFO"
     try {
-        db.exec(sql, function(results) {
-        res.render('table_view', { title: title, sql: sql, url: url, results: results});
-        //console.log(results);
+        stmt.exec(sql, function(results) {
+          res.render('table_view', { title: title, sql: sql, url: url, results: results});
+          //console.log(results);
+          stmt.close();
         }); 
     }
     catch (err) {
@@ -226,12 +245,14 @@ app.get('/LICENSE_INFO', function(req, res) {
 
 app.get('/JOURNAL_INFO', function(req, res) {
     var title = "JOURNAL_INFO"
+    var stmt = new db.dbstmt(dbconn);
     var sql = "SELECT * FROM QSYS2.JOURNAL_INFO"
     var url = "https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/QSYS2.JOURNAL_INFO%20view"
     try {
-        db.exec(sql, function(results) {
-        res.render('table_view', { title: title, sql: sql, url: url, results: results});
-        //console.log(results);
+        stmt.exec(sql, function(results) {
+          res.render('table_view', { title: title, sql: sql, url: url, results: results});
+          //console.log(results);
+          stmt.close();
         }); 
     }
     catch (err) {
@@ -241,12 +262,14 @@ app.get('/JOURNAL_INFO', function(req, res) {
 
 app.get('/USER_INFO', function(req, res) {
     var title = "USER_INFO"
+    var stmt = new db.dbstmt(dbconn);
     var sql = "SELECT * FROM QSYS2.USER_INFO"
     var url = "https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/QSYS2.USER_INFO%20catalog"
     try {
-        db.exec(sql, function(results) {
-        res.render('table_view', { title: title, sql: sql, url: url, results: results});
-        //console.log(results);
+        stmt.exec(sql, function(results) {
+          res.render('table_view', { title: title, sql: sql, url: url, results: results});
+          //console.log(results);
+          stmt.close();
         }); 
     }
     catch (err) {
@@ -256,12 +279,14 @@ app.get('/USER_INFO', function(req, res) {
 
 app.get('/TCPIP_INFO', function(req, res) {
     var title = "TCPIP_INFO"
+    var stmt = new db.dbstmt(dbconn);
     var sql = "SELECT * FROM QSYS2.TCPIP_INFO"
     var url = "https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/QSYS2.TCPIP_INFO%20view"
     try {
-        db.exec(sql, function(results) {
-        res.render('table_view', { title: title, sql: sql, url: url, results: results});
-        //console.log(results);
+        stmt.exec(sql, function(results) {
+          res.render('table_view', { title: title, sql: sql, url: url, results: results});
+          //console.log(results);
+          stmt.close();
         }); 
     }
     catch (err) {
@@ -271,12 +296,14 @@ app.get('/TCPIP_INFO', function(req, res) {
 
 app.get('/NETSTAT_INFO', function(req, res) {
     var title = "NETSTAT_INFO"
+    var stmt = new db.dbstmt(dbconn);
     var sql = "SELECT * FROM QSYS2.NETSTAT_INFO"
     var url = "https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/QSYS2.NETSTAT_INFO"
     try {
-        db.exec(sql, function(results) {
-        res.render('table_view', { title: title, sql: sql, url: url, results: results});
-        //console.log(results);
+        stmt.exec(sql, function(results) {
+          res.render('table_view', { title: title, sql: sql, url: url, results: results});
+          //console.log(results);
+          stmt.close();
         }); 
     }
     catch (err) {
@@ -286,12 +313,14 @@ app.get('/NETSTAT_INFO', function(req, res) {
 
 app.get('/USER_STORAGE', function(req, res) {
     var title = "USER_STORAGE"
+    var stmt = new db.dbstmt(dbconn);
     var sql = "SELECT * FROM QSYS2/USER_STORAGE"
     var url = "https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/QSYS2.USER_STORAGE%20catalog"
     try {
-        db.exec(sql, function(results) {
-        res.render('table_view', { title: title, sql: sql, url: url, results: results});
-        //console.log(results);
+        stmt.exec(sql, function(results) {
+          res.render('table_view', { title: title, sql: sql, url: url, results: results});
+          //console.log(results);
+          stmt.close();
         }); 
     }
     catch (err) {
@@ -301,12 +330,14 @@ app.get('/USER_STORAGE', function(req, res) {
 
 app.get('/OUTPUT_QUEUE_INFO', function(req, res) {
     var title = "OUTPUT_QUEUE_INFO"
+    var stmt = new db.dbstmt(dbconn);
     var sql = "SELECT * FROM QSYS2.OUTPUT_QUEUE_INFO"
     var url = "https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/QSYS2.OUTPUT_QUEUE_INFO%20-%20View"
     try {
-        db.exec(sql, function(results) {
-        res.render('table_view', { title: title, sql: sql, url: url, results: results});
-        //console.log(results);
+        stmt.exec(sql, function(results) {
+          res.render('table_view', { title: title, sql: sql, url: url, results: results});
+          //console.log(results);
+          stmt.close();
         }); 
     }
     catch (err) {
@@ -316,12 +347,14 @@ app.get('/OUTPUT_QUEUE_INFO', function(req, res) {
 
 app.get('/SERVER_SBS_ROUTING', function(req, res) {
     var title = "SERVER_SBS_ROUTING"
+    var stmt = new db.dbstmt(dbconn);
     var sql = "SELECT * FROM QSYS2.SERVER_SBS_ROUTING"
     var url = "https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/QSYS2.SERVER_SBS_ROUTING%20-%20view"
     try {
-        db.exec(sql, function(results) {
-        res.render('table_view', { title: title, sql: sql, url: url, results: results});
-        //console.log(results);
+        stmt.exec(sql, function(results) {
+          res.render('table_view', { title: title, sql: sql, url: url, results: results});
+          //console.log(results);
+          stmt.close();
         }); 
     }
     catch (err) {
@@ -331,12 +364,14 @@ app.get('/SERVER_SBS_ROUTING', function(req, res) {
 
 app.get('/SYSTEM_VALUE_INFO', function(req, res) {
     var title = "SYSTEM_VALUE_INFO"
+    var stmt = new db.dbstmt(dbconn);
     var sql = "SELECT * FROM SYSTEM_VALUE_INFO"
     var url = "https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/QSYS2.SYSTEM_VALUE_INFO%20catalog"
     try {
-        db.exec(sql, function(results) {
-        res.render('table_view', { title: title, sql: sql, url: url, results: results});
-        //console.log(results);
+        stmt.exec(sql, function(results) {
+          res.render('table_view', { title: title, sql: sql, url: url, results: results});
+          //console.log(results);
+          stmt.close();
         }); 
     }
     catch (err) {
@@ -346,12 +381,14 @@ app.get('/SYSTEM_VALUE_INFO', function(req, res) {
 
 app.get('/ACTIVE_JOB_INFO', function(req, res) {
     var title = "ACTIVE_JOB_INFO"
+    var stmt = new db.dbstmt(dbconn);
     var sql = "SELECT 8 FROM QSYS2.ACTIVE_JOB_INFO"
     var url = "https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/QSYS2.ACTIVE_JOB_INFO()%20-%20UDTF"
     try {
-        db.exec(sql, function(results) {
-        res.render('table_view', { title: title, sql: sql, url: url, results: results});
-        //console.log(results);
+        stmt.exec(sql, function(results) {
+          res.render('table_view', { title: title, sql: sql, url: url, results: results});
+          //console.log(results);
+          stmt.close();
         }); 
     }
     catch (err) {
@@ -361,12 +398,14 @@ app.get('/ACTIVE_JOB_INFO', function(req, res) {
 
 app.get('/GROUP_PROFILE_ENTRIES', function(req, res) {
     var title = "GROUP_PROFILE_ENTRIES"
+    var stmt = new db.dbstmt(dbconn);
     var sql = "SELECT * FROM QSYS2.GROUP_PROFILE_ENTRIES"
     var url = "https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/QSYS2.GROUP_PROFILE_ENTRIES%20%E2%80%93%20new%20security%20view"
     try {
-        db.exec(sql, function(results) {
-        res.render('table_view', { title: title, sql: sql, url: url, results: results});
-        //console.log(results);
+        stmt.exec(sql, function(results) {
+          res.render('table_view', { title: title, sql: sql, url: url, results: results});
+          //console.log(results);
+          stmt.close();
         }); 
     }
     catch (err) {
@@ -376,12 +415,14 @@ app.get('/GROUP_PROFILE_ENTRIES', function(req, res) {
 
 app.get('/DRDA_AUTHENTICATION_ENTRY_INFO', function(req, res) {
     var title = "DRDA_AUTHENTICATION_ENTRY_INFO"
+    var stmt = new db.dbstmt(dbconn);
     var sql = "SELECT * FROM QSYS2.DRDA_AUTHENTICATION_ENTRY_INFO"
     var url = "https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/QSYS2.DRDA_AUTHENTICATION_ENTRY_INFO"
     try {
-        db.exec(sql, function(results) {
-        res.render('table_view', { title: title, sql: sql, url: url, results: results});
-        //console.log(results);
+        stmt.exec(sql, function(results) {
+          res.render('table_view', { title: title, sql: sql, url: url, results: results});
+          //console.log(results);
+          stmt.close();
         }); 
     }
     catch (err) {
@@ -391,12 +432,14 @@ app.get('/DRDA_AUTHENTICATION_ENTRY_INFO', function(req, res) {
 
 app.get('/ENVIRONMENT_VARIABLE_INFO', function(req, res) {
     var title = "ENVIRONMENT_VARIABLE_INFO"
+    var stmt = new db.dbstmt(dbconn);
     var sql = "SELECT * FROM QSYS2.ENVIRONMENT_VARIABLE_INFO"
     var url = "https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/QSYS2.ENVIRONMENT_VARIABLE_INFO%20-%20view"
     try {
-        db.exec(sql, function(results) {
-        res.render('table_view', { title: title, sql: sql, url: url, results: results});
-        //console.log(results);
+        stmt.exec(sql, function(results) {
+          res.render('table_view', { title: title, sql: sql, url: url, results: results});
+          //console.log(results);
+          stmt.close();
         }); 
     }
     catch (err) {
