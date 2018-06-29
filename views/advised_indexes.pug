@@ -1,4 +1,4 @@
-include ./includes/header.jade
+include ./includes/header.pug
 
 h1=title
 table(class='table table-striped table-hover table-condensed')
@@ -12,7 +12,7 @@ table(class='table table-striped table-hover table-condensed')
       th Last Advised
       th Keys Advised
   tbody
-    - each row in results
+    each row in results
       tr
         td=row.DBNAME
         td=row.TBNAME
@@ -22,4 +22,4 @@ table(class='table table-striped table-hover table-condensed')
         td=row.LASTADV
         td=row.KEYSADV
           
-include ./includes/footer.jade
+include ./includes/footer.pug

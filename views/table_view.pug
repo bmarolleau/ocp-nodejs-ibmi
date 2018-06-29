@@ -1,4 +1,4 @@
-include ./includes/header.jade
+include ./includes/header.pug
 
 div.container
     h2=title
@@ -10,9 +10,9 @@ div.container
     br
     table.table.table-striped.table-hover.table-condensed
             tbody
-            - each row, title in results[0]
+            each row, title in results[0]
                 tr
                     td=title
                     td=row
         
-include ./includes/footer.jade
+include ./includes/footer.pug

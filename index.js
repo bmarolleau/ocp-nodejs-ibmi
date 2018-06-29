@@ -30,7 +30,7 @@ app.locals._      = require('underscore');
 app.locals._.str  = require('underscore.string');
 
 app.set('views', __dirname + '/views')
-app.set('view engine', 'jade')
+app.set('view engine', 'pug')
 
 app.get('/', function (req, res) {
   res.render('index', { title: 'Hey', message: 'Hello there!'})
@@ -382,7 +382,7 @@ app.get('/SYSTEM_VALUE_INFO', function(req, res) {
 app.get('/ACTIVE_JOB_INFO', function(req, res) {
     var title = "ACTIVE_JOB_INFO"
     var stmt = new db.dbstmt(dbconn);
-    var sql = "SELECT 8 FROM QSYS2.ACTIVE_JOB_INFO"
+    var sql = "SELECT * FROM TABLE(QSYS2.ACTIVE_JOB_INFO()) AS X"
     var url = "https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/QSYS2.ACTIVE_JOB_INFO()%20-%20UDTF"
     try {
         stmt.exec(sql, function(results) {
