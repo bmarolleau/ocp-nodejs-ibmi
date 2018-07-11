@@ -191,10 +191,26 @@ app.get('/ptf_group_info', function (req, res) {
   stmt.exec(sql, function(results) {
     res.render('ptf_group_info', { title: title, results: results })
     stmt.close();
-   })
+  })
  })
  
  
+ app.get('/ptf_group_status', function (req, res) {
+  var title = "PTF Group status"
+  var stmt = new db.dbstmt(dbconn);
+  var sql = 
+    "select PTF_GROUP_TITLE, PTF_GROUP_ID, PTF_GROUP_LEVEL_AVAILABLE, PTF_GROUP_LEVEL_INSTALLED, " +
+    "   	date( PTF_GROUP_LAST_UPDATED_BY_IBM ) as PTF_GROUP_LAST_UPDATED_BY_IBM, " +
+    "       case when PTF_GROUP_CURRENCY = 'UPDATE AVAILABLE' then 'UPDATE' else '' end as Warning" +
+    "  from SYSTOOLS.GROUP_PTF_CURRENCY " +
+    " order by 2 desc "
+  stmt.exec(sql, function(results) {
+    res.render('ptf_group_status', { title: title, results: results })
+    stmt.close();
+  })
+})
+
+
 app.get('/sysdiskstat', function(req, res) {
     try {
         db.exec("SELECT PERCENT_USED FROM QSYS2.SYSDISKSTAT", function(results) {
