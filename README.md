@@ -52,3 +52,4 @@ The following people have taken the time to learn how to do a Git fork and pull 
 - Travis Glover twitter/@iistrav
 - Markus A. Litters, INSA Software & Services Ltd.
 - Robert Brown
+- Ryan Beckham
