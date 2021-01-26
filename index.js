@@ -213,7 +213,9 @@ app.get('/ptf_group_info', function (req, res) {
 
 app.get('/sysdiskstat', function(req, res) {
     try {
-        db.exec("SELECT PERCENT_USED FROM QSYS2.SYSDISKSTAT", function(results) {
+        let stmt = new db.dbstmt(dbconn);
+
+        stmt.exec("SELECT PERCENT_USED FROM QSYS2.SYSDISKSTAT", function(results) {
           res.render('sysdiskstat', { title: 'SYSDISKSTAT', diskResults: results});
           //console.log(results);
           stmt.close();
