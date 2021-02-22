@@ -1,18 +1,31 @@
 include ./includes/header.pug
+  
+link(rel="stylesheet", href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.css")
+script(src="https://code.jquery.com/jquery-3.5.1.js", crossorigin="anonymous")
+script(src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.js", crossorigin="anonymous")
 
-div.container
-    h2=title
-    p2=sql
-        br
-        | For more info&#160
-        a(href=url) Click Here
+h2=title
+p2=sql
     br
-    br
-    table.table.table-striped.table-hover.table-condensed
-            tbody
-            each row, title in results[0]
+    | For more info&#160
+    a(href=url) Click Here
+br
+br
+table.table.table-striped.table-hover.table-condensed#maintable
+        thead
+            tr
+                each name in results.columns
+                    th=name.name
+        tbody
+            each row in results
                 tr
-                    td=title
-                    td=row
+                    each data in row
+                        td=data
+script(type='text/javascript').
+    $(document).ready( function () {
+        $('#maintable').DataTable({
+            "lengthMenu": [[-1, 10, 50], ["*ALL", 10, 50]]
+        });
+    });
         
 include ./includes/footer.pug
