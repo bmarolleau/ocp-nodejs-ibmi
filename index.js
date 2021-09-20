@@ -15,10 +15,11 @@ const { Connection, CommandCall, ProgramCall } = require('itoolkit');
 
 var conn;
 
-#var port_secure = process.argv[2] || 8443
-var port_insecure = process.argv[3] || 8080
-var host_name = process.argv[4] || os.hostname()
+//var port_secure = process.argv[2] || 8443
+//var port_insecure = process.argv[3] || 8080
+//var host_name = process.argv[4] || os.hostname()
 
+var port_insecure = 3000
 app.locals._ = require('underscore');
 app.locals._.str = require('underscore.string');
 
