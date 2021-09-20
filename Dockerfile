@@ -20,9 +20,7 @@ RUN rm -rf node_modules package-lock.json
 RUN chown -R 1001:0 /app
 USER 1001
 # test with sample odbc.ini - this file will be mounted from a secret or configmap
-#RUN cp /app/.odbc.ini $HOME
-RUN echo $HOME
-COPY odbc.ini $HOME/.odbc.ini
+RUN cp /app/odbc.ini $HOME/.odbc.ini
 RUN npm install
 RUN npm list
 RUN ls node_modules/odbc
