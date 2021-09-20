@@ -15,7 +15,7 @@ const { Connection, CommandCall, ProgramCall } = require('itoolkit');
 
 var conn;
 
-var port_secure = process.argv[2] || 8443
+#var port_secure = process.argv[2] || 8443
 var port_insecure = process.argv[3] || 8080
 var host_name = process.argv[4] || os.hostname()
 
@@ -489,21 +489,21 @@ odbc.connect('DSN=ibmidemo', (error, connection) => {
     console.log('got connection: ' + JSON.stringify(conn));
 
     try {
-      var options = {
-        key: fs.readFileSync('./ibmidash-key.pem'),
-        cert: fs.readFileSync('./ibmidash-cert.pem')
-      }
+      //#var options = {
+      //#  key: fs.readFileSync('./ibmidash-key.pem'),
+      //#  cert: fs.readFileSync('./ibmidash-cert.pem')
+      //#}
       http.createServer(function (req, res) {
-        var new_loc = 'https://' + host_name + ':' + port_secure
-        console.log('new_loc:%s', new_loc)
-        res.writeHead(301,
-          { Location: new_loc }
-        );
-        res.end();
+       //# var new_loc = 'https://' + host_name + ':' + port_secure
+       //# console.log('new_loc:%s', new_loc)
+       //# res.writeHead(301,
+       //#   { Location: new_loc }
+       //# );
+       //# res.end();
       }).listen(port_insecure);
-      var httpsServer = https.createServer(options, app).listen(port_secure);
-      console.log("listening on port " + port_insecure);
-      io.attach(httpsServer);
+      //#var httpsServer = https.createServer(options, app).listen(port_secure);
+      //#console.log("listening on port " + port_insecure);
+      //#io.attach(httpsServer);
     } catch (err) {
       console.log(err);
       console.log("falling back to http");
