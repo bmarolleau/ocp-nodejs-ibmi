@@ -26,4 +26,4 @@ RUN npm list
 RUN ls node_modules/odbc
 CMD ["npm", "list"]
 CMD ["node", "index.js"]
-EXPOSE 3000
+EXPOSE 8080

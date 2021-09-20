@@ -19,7 +19,7 @@ var conn;
 //var port_insecure = process.argv[3] || 8080
 //var host_name = process.argv[4] || os.hostname()
 
-var port_insecure = 3000
+var port_insecure = 8080
 app.locals._ = require('underscore');
 app.locals._.str = require('underscore.string');
 
