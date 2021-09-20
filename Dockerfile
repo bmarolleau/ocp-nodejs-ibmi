@@ -3,14 +3,17 @@ WORKDIR /app
 COPY . .
 RUN id
 USER 0
+ARG ARCHITECTURE=x86_64
+ENV ARCHITECTURE $ARCHITECTURE
+
 RUN rm -rf node_modules
 RUN yum repolist
 RUN yum --assumeyes install unixODBC-devel gcc
 RUN yum --assumeyes install python3 && ln -sf python3 /usr/bin/python
 #RUN curl -vvv -k 'https://w3.rchland.ibm.com/projects/CA400/Win32/process/express/drivers/pool/v7r2m0/v0001/IBMiAccess_v1r1_LinuxAP_u14.zip' -o ap.zip
 #RUN unzip -j ap.zip \*x86_64.rpm
-RUN unzip IBMiAccess_v1r1_LinuxAP_u14.zip \*x86_64.rpm
-RUN  yum --assumeyes  install  ./x86_64/ibm-iaccess-*.rpm
+RUN unzip IBMiAccess_v1r1_LinuxAP_u14.zip \*${ARCHITECTURE}.rpm
+RUN  yum --assumeyes  install  ./${ARCHITECTURE}/ibm-iaccess-*.rpm
 RUN npm install -g npm
 RUN npm install -g node-pre-gyp
 RUN rm -rf node_modules package-lock.json
