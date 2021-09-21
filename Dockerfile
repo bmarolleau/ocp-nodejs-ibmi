@@ -1,11 +1,11 @@
+#ARG ARCHITECTURE=x86_64
+ARG ARCHITECTURE=ppc64le
 FROM  registry.access.redhat.com/ubi8/nodejs-14
+ENV ARCHITECTURE $ARCHITECTURE
 WORKDIR /app
 COPY . .
 RUN id
 USER 0
-#ARG ARCHITECTURE=x86_64
-ARG ARCHITECTURE=ppc64le
-ENV ARCHITECTURE $ARCHITECTURE
 RUN rm -rf node_modules
 RUN yum repolist
 RUN yum --assumeyes install unixODBC-devel gcc

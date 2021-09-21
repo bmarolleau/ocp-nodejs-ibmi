@@ -18,8 +18,9 @@ var conn;
 //var port_secure = process.argv[2] || 8443
 //var port_insecure = process.argv[3] || 8080
 //var host_name = process.argv[4] || os.hostname()
+var port_insecure = 8080;
+var dsnname= process.env.DSN || "IBMIDEMO" ;
 
-var port_insecure = 8080
 app.locals._ = require('underscore');
 app.locals._.str = require('underscore.string');
 
@@ -29,6 +30,9 @@ app.set('view engine', 'pug')
 app.get('/', function (req, res) {
   res.render('index', { title: 'Hey', message: 'Hello there!' })
 })
+
+app.listen(port_insecure)
+
 app.get('/users', function (req, httpResponse) {
   var sql =
     "SELECT * FROM QSYS2.USER_STORAGE AS US" +
@@ -173,7 +177,7 @@ app.get('/splf_stg', function (req, res) {
   })
 })
 
-io.on('connection', function (socket) {
+/* io.on('connection', function (socket) {
   console.log('WRKACTJOB client connected');
   var wrkactjob_itv = setInterval(function () {
 
@@ -191,7 +195,7 @@ io.on('connection', function (socket) {
     console.log('WRKACTJOB client disconnected');
     clearInterval(wrkactjob_itv);
   })
-})
+}) */
 
 
 app.get('/ptf_group_info', function (req, res) {
@@ -424,7 +428,7 @@ app.get('/IBMi_program_call', function (req, res) {
   ];
   let xt = new Connection({
     transport: 'odbc',
-    transportOptions: { dsn: 'ibmidemo' }
+    transportOptions: { dsn: dsnname }
   });
   let pgm = new ProgramCall("QTOCNETSTS", { "lib": "QSYS", "func": "QtocRtvTCPA" });
   pgm.addParam({ io: "out", len: "rec1", type: "ds", fields: outBuf });
@@ -456,7 +460,7 @@ app.get('/IBMi_cl_command', function (req, httpResponse) {
   try {
     let conn = new Connection({
       transport: 'odbc',
-      transportOptions: { dsn: 'ibmidemo' }
+      transportOptions: { dsn: dsnname }
     });
     conn.add(new CommandCall({ type: 'cl', command: 'RTVJOBA USRLIBL(?) SYSLIBL(?)' }));
     conn.run(function (error, results) {
@@ -482,7 +486,7 @@ app.get('/IBMi_cl_command', function (req, httpResponse) {
   }
 });
 
-odbc.connect('DSN=ibmidemo', (error, connection) => {
+odbc.connect('DSN='+dsnname, (error, connection) => {
   if (error) { 
     console.log(error);
   } else {
@@ -494,14 +498,14 @@ odbc.connect('DSN=ibmidemo', (error, connection) => {
       //#  key: fs.readFileSync('./ibmidash-key.pem'),
       //#  cert: fs.readFileSync('./ibmidash-cert.pem')
       //#}
-      http.createServer(function (req, res) {
+     // http.createServer(function (req, res) {
        //# var new_loc = 'https://' + host_name + ':' + port_secure
        //# console.log('new_loc:%s', new_loc)
        //# res.writeHead(301,
        //#   { Location: new_loc }
        //# );
        //# res.end();
-      }).listen(port_insecure);
+      //}).listen(port_insecure);
       //#var httpsServer = https.createServer(options, app).listen(port_secure);
       //#console.log("listening on port " + port_insecure);
       //#io.attach(httpsServer);
@@ -510,7 +514,7 @@ odbc.connect('DSN=ibmidemo', (error, connection) => {
       console.log("falling back to http");
       var httpServer = http.createServer(app).listen(port_insecure);
       console.log("listening on port " + port_insecure);
-      io.attach(httpServer);
+      //io.attach(httpServer);
     }
   }
 });
