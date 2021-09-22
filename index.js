@@ -250,7 +250,7 @@ app.get('/SYSTEM_STATUS_INFO', function (req, res) {
   var url = "https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/IBM%20i%20Technology%20Updates/page/QSYS2.SYSTEM_STATUS_INFO"
   try {
     conn.query(sql, function (error, results) {
-      res.render('table_view_single', { title: title, sql: sql, url: url, results: results });
+      res.render('table_view', { title: title, sql: sql, url: url, results: results });
       //console.log(results);
 
     });
