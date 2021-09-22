@@ -1,5 +1,5 @@
 # Dash for IBM i
-Welcome!  This is the **Dash for IBM i** open source project that aims to make it easy to create dashboard pages for IBM i purposes.
+Welcome!  This is the **Dash for IBM i** open source project that aims to make it easy to create dashboard pages for IBM i purposes. 
 
 ##Please [fork](http://www.ibmsystemsmag.com/ibmi/developer/general/How-to-Contribute-to-Open-Source-Projects/) and add your own dashboard page!
 
