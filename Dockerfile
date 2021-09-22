@@ -1,6 +1,6 @@
-#ARG ARCHITECTURE=x86_64
-ARG ARCHITECTURE=ppc64le
+###ARG CAN BE ppc64le, x86_64, ppc64 
 FROM  registry.access.redhat.com/ubi8/nodejs-14
+ARG ARCHITECTURE=ppc64le
 ENV ARCHITECTURE $ARCHITECTURE
 WORKDIR /app
 COPY . .
