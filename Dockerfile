@@ -1,7 +1,7 @@
 ###ARG for odbc driver : can be ppc64le, x86_64, ppc64 
 FROM  registry.access.redhat.com/ubi8/nodejs-14
 ARG ARCHITECTURE=x86_64
-ARG NPM_OPTIONS=--max-old-space-size=256
+ARG NPM_OPTIONS=--max-old-space-size=512
 ENV ARCHITECTURE $ARCHITECTURE
 ENV NPM_OPTIONS $NPM_OPTIONS
 WORKDIR /opt/app-root/src
