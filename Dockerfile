@@ -14,7 +14,7 @@ RUN npm install -g npm node-pre-gyp && rm -rf node_modules package-lock.json
 RUN cp odbc.ini /etc/odbc.ini
 RUN chown -R 1001:0 .
 USER 1001
-RUN export NODE_OPTIONS=${NPM_OPTIONS} npm install
+RUN export NODE_OPTIONS=${NPM_OPTIONS} && npm install
 CMD ["npm", "list"]
 CMD ["node", "index.js"]
 EXPOSE 8080
