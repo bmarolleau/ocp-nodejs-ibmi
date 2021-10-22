@@ -1,7 +1,7 @@
 ###ARG for odbc driver : can be ppc64le, x86_64, ppc64 
 FROM  registry.access.redhat.com/ubi8/nodejs-14
 ARG ARCHITECTURE=x86_64
-ARG NPM_OPTIONS="--max-old-space-size=256"  
+ARG NPM_OPTIONS=--max-old-space-size=256
 ENV ARCHITECTURE $ARCHITECTURE
 ENV NPM_OPTIONS $NPM_OPTIONS
 WORKDIR /opt/app-root/src
@@ -14,7 +14,7 @@ RUN npm install -g npm node-pre-gyp && rm -rf node_modules package-lock.json
 RUN cp odbc.ini /etc/odbc.ini
 RUN chown -R 1001:0 .
 USER 1001
-RUN export NODE_OPTIONS=${NPM_OPTIONS} && npm install
+RUN NODE_OPTIONS=${NPM_OPTIONS} npm install
 CMD ["npm", "list"]
 CMD ["node", "index.js"]
 EXPOSE 8080
